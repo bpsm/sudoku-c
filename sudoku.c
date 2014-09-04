@@ -59,8 +59,6 @@ typedef unsigned short int digit_set;
 #define SET_OF(digit)      ((digit_set)(1 << (digit)))
 #define IN_SET(set, digit) ((set & SET_OF(digit)) != 0)
 #define SET_SIZE(set)      (__builtin_popcount(set))
-#define MIN_SET_DIGIT(set) (__builtin_ctz(set))
-#define MAX_SET_DIGIT(set) (15 - __builtin_clz(set))
 
 /*
  * Representing the Sudoku Board
@@ -303,9 +301,7 @@ bool solve(solver *s)
     return true;
 
   sudoku r = s->sudoku;
-  digit min = MIN_SET_DIGIT(dsp);
-  digit max = MAX_SET_DIGIT(dsp);
-  for (digit d = min; d <= max; d++)
+  for (digit d = MIN_DIGIT; d <= MAX_DIGIT; d++)
     if (IN_SET(dsp, d)) {
       claim(&s->sudoku, p, SET_OF(d));
       if (solve(s)) {
