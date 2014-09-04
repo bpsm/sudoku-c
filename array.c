@@ -61,7 +61,7 @@ void  array_pop(array this)
 
 void  *array_top(array this)
 {
-
+  return NULL;
 }
 
   
