@@ -20,7 +20,7 @@ void  array_ins(array this, size_t index, void const *mem);
 void  array_del(array this, size_t index);
 
 void  array_push(array this, void const *mem);
-void  array_pop(array this);
+void  array_pop(array this, void *mem);
 void  *array_top(array this);
 
 
