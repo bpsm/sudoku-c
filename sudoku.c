@@ -40,6 +40,29 @@ typedef byte digit;
 #define CHAR_TO_DIGIT(c) ((digit)(c - '0'))
 
 /*
+ * Popcount (Hamming Distance)
+ * ===========================
+ *
+ * Implementing digit sets (below) requires an implementation of
+ * popcount to count the number of 1 bits in the digit sets.
+ * GCC provides __builtin_popcount(n), but the performance of
+ * same on ARM is underwhelming.
+ */
+
+unsigned char popcount_lut[512];
+
+void popcount_init(void)
+{
+  for (int i = 0; i < 512; i++)
+    popcount_lut[i] = __builtin_popcount(i);
+}
+
+int popcount(unsigned short n)
+{
+  return popcount_lut[n >> 1];
+}
+
+/*
  * Digit Sets
  * ==========
  *
@@ -58,7 +81,7 @@ typedef unsigned short int digit_set;
 #define ALL_DIGITS         ((digit_set)0x03FE)
 #define SET_OF(digit)      ((digit_set)(1 << (digit)))
 #define IN_SET(set, digit) ((set & SET_OF(digit)) != 0)
-#define SET_SIZE(set)      (__builtin_popcount(set))
+#define SET_SIZE(set)      (popcount(set))
 
 /*
  * Representing the Sudoku Board
@@ -448,6 +471,8 @@ int main(int n, char **args) {
   bool verbose = true;
   solver s;
   char t[SUDOKU_SIZE+1];
+
+  popcount_init();
 
   reader* r = new_reader();
   while (read_sudoku(r, &s)) {
