@@ -424,7 +424,7 @@ void sudoku_from_text(sudoku *s, char const *t)
   for (int i = 0; i < SUDOKU_SIZE && t[i]; i++) {
     char c = t[i];
     if ('1' <= c && c <= '9')
-      claim(s, i, SET_OF(c - '0'));
+      claim(s, i, SET_OF(CHAR_TO_DIGIT(c)));
   }
 }
 
