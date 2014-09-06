@@ -40,14 +40,35 @@ typedef byte digit;
 #define CHAR_TO_DIGIT(c) ((digit)(c - '0'))
 
 /*
- * Popcount (Hamming Distance)
- * ===========================
+ * Digit Sets
+ * ==========
  *
- * Implementing digit sets (below) requires an implementation of
- * popcount to count the number of 1 bits in a digit set.
- * GCC provides __builtin_popcount(n), but the performance of
- * same on ARM is underwhelming.
+ * For each of the 81 positions on the Sudoku we'll want to keep track
+ * of which of the 9 digits are (still) possible for that position.
+ * (So, a set of the digits [1..9].
+ * 
+ * We represent this set using a short int (16 bit) where the bits 1
+ * through 9 are set to 1 to indicate the presence of the corresponding
+ * digit in the set. The other bits [0, 10..15] are always zero.
+ *
+ * Popcount (Hamming Distance)
+ * ---------------------------
+ *
+ * To implement SET_SIZE blow, we require a way to conunt the number
+ * of bits set to 1 (popcount).  GCC provides __builtin_popcount(n),
+ * but the performance of same on ARM is underwhelming, so we use a
+ * lookup table, which improves performance of the whole program by a
+ * factor of 4 on the raspberry pi without reducing performance on
+ * x86.
  */
+
+typedef unsigned short int digit_set;
+
+#define NO_DIGITS          ((digit_set)0)
+#define ALL_DIGITS         ((digit_set)0x03FE)
+#define SET_OF(digit)      ((digit_set)(1 << (digit)))
+#define IN_SET(set, digit) ((set & SET_OF(digit)) != 0)
+#define SET_SIZE(set)      (popcount_lut[(set) >> 1])
 
 const byte popcount_lut[512] = {
   0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
@@ -83,32 +104,6 @@ const byte popcount_lut[512] = {
   4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8,
   5, 6, 6, 7, 6, 7, 7, 8, 6, 7, 7, 8, 7, 8, 8, 9
 };
-
-int popcount(unsigned short n)
-{
-  return popcount_lut[n >> 1];
-}
-
-/*
- * Digit Sets
- * ==========
- *
- * For each of the 81 positions on the Sudoku we'll want to keep track
- * of which of the 9 digits are (still) possible for that position.
- * (So, a set of the digits [1..9].
- * 
- * We represent this set using a short int (16 bit) where the bits 1
- * through 9 are set to 1 to indicate the presence of the corresponding
- * digit in the set. The other bits [0, 10..15] are always zero.
- */
-
-typedef unsigned short int digit_set;
-
-#define NO_DIGITS          ((digit_set)0)
-#define ALL_DIGITS         ((digit_set)0x03FE)
-#define SET_OF(digit)      ((digit_set)(1 << (digit)))
-#define IN_SET(set, digit) ((set & SET_OF(digit)) != 0)
-#define SET_SIZE(set)      (popcount(set))
 
 /*
  * Representing the Sudoku Board
