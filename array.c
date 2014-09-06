@@ -97,6 +97,7 @@ void  *array_top(array this)
   return REF(this, this->length-1);
 }
 
+/*
 int main(int n, char **args) {
   int tmp = 1;
   array a = array_new(3, sizeof(int), NULL);
@@ -112,3 +113,4 @@ int main(int n, char **args) {
   }
   printf("%d\n", (int)a->length);
 }  
+*/
