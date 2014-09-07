@@ -1,26 +1,41 @@
 #include <stdlib.h>
 
-typedef void (*del_fn)(void *mem);
-
-typedef struct array_desc {
+typedef struct {
   size_t capacity;
   size_t mem_size;
-  del_fn del_mem;
-  size_t length;
-  char data[];
-} *array;
+  char *data;
+} array;
 
-array array_new(size_t capacity, size_t mem_size, del_fn del_mem);
-void  array_free(array this);
+array * array_alloc(void);
+void array_open(array *this, size_t capacity, size_t mem_size);
+void array_close(array *this);
+void array_free(array *this);
 
-void *array_ref(const array this, size_t index);
-void  array_get(const array this, size_t index, void *mem);
-void  array_put(array this, size_t index, void const *mem);
-void  array_ins(array this, size_t index, void const *mem);
-void  array_del(array this, size_t index);
+void array_get(array *this, size_t index, void *member);
+void array_put(array *this, size_t index, void *member);
+void array_move(array *this, size_t dst_index, size_t src_index, size_t count);
 
-void  array_push(array this, void const *mem);
-void  array_pop(array this, void *mem);
-void  *array_top(array this);
+size_t array_length(array *this);
 
+typedef struct {
+  array array;
+  size_t gap;    /* position of gap */
+  size_t length; /* length of gap is capacity - length */
+} buffer;
+
+buffer * buffer_alloc(void);
+void buffer_open(buffer *this, size_t capacity, size_t mem_size);
+void buffer_close(buffer *this);
+void buffer_free(buffer *this);
+
+void buffer_get(buffer* this, size_t index, void *member);
+void buffer_put(buffer* this, size_t index, void *member);
+void buffer_del(buffer* this, size_t index);
+void buffer_ins(buffer* this, size_t index, void *member);
+
+void buffer_push(buffer* this, void *member);
+void buffer_pop(buffer* this, void *member);
+void buffer_top(buffer* this, void *member);
+
+size_t buffer_length(buffer* this);
 
