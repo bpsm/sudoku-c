@@ -53,9 +53,9 @@ void array_move(array *this, size_t dst_index, size_t src_index, size_t count)
 {
   assert(this);
   assert(dst_index < this->capacity);
-  assert((dst_index + count) < this->capacity);
+  assert((dst_index + count) <= this->capacity);
   assert(src_index < this->capacity);
-  assert((src_index + count) < this->capacity);
+  assert((src_index + count) <= this->capacity);
   memmove(this->data + dst_index * this->mem_size,
           this->data + src_index * this->mem_size,
           count * this->mem_size);
