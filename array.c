@@ -13,28 +13,31 @@
  * identically sized values.
  */
 
-array * array_alloc(void)
+array *array_alloc(void)
 {
   return calloc(1, sizeof(array));
 }
 
-void array_open(array *this, size_t capacity, size_t mem_size)
+array *array_open(array *this, size_t capacity, size_t mem_size)
 {
   assert(this); assert(this->data == NULL);
   this->capacity = capacity;
   this->mem_size = mem_size;
   this->data = calloc(capacity, mem_size);
+  return this;
 }
 
-void array_close(array *this)
+array *array_close(array *this)
 {
   assert(this); assert(this->data);
   free(this->data);
+  return this;
 }
 
-void array_free(array *this)
+array *array_free(array *this)
 {
   free(this);
+  return NULL;
 }
 
 void array_get(array *this, size_t index, void *member)
@@ -75,29 +78,32 @@ size_t array_length(array *this)
  * deletion.
  */
 
-buffer * buffer_alloc(void)
+buffer *buffer_alloc(void)
 {
   return calloc(1, sizeof(buffer));
 }
 
-void buffer_open(buffer *this, size_t capacity, size_t mem_size)
+buffer *buffer_open(buffer *this, size_t capacity, size_t mem_size)
 {
   assert(this);
   array_open(&this->array, capacity, mem_size);
   this->gap = 0;
   this->length = 0;
+  return this;
 }
 
-void buffer_close(buffer *this)
+buffer *buffer_close(buffer *this)
 {
   assert(this);
   array_close(&this->array);
+  return this;
 }
 
-void buffer_free(buffer *this)
+buffer *buffer_free(buffer *this)
 {
   assert(this);
   free(this);
+  return NULL;
 }
 
 #define BUFLEN(this) (this->length)
@@ -159,10 +165,12 @@ void buffer_put(buffer* this, size_t index, void *member)
   }
 }
 
-void buffer_del(buffer* this, size_t index)
+void buffer_del(buffer* this, size_t index, void *member)
 {
   assert(this);
   assert(index < BUFLEN(this));
+  if (member)
+    buffer_get(this, index, member);
   if (this->gap != index)
     buffer_move_gap(this, index);
   this->length--;
@@ -187,8 +195,7 @@ void buffer_push(buffer* this, void *member)
 
 void buffer_pop(buffer* this, void *member)
 {
-  buffer_get(this, BUFLEN(this) - 1, member);
-  buffer_del(this, BUFLEN(this) - 1);
+  buffer_del(this, BUFLEN(this) - 1, member);
 }
 
 void buffer_top(buffer* this, void *member)
@@ -200,3 +207,9 @@ size_t buffer_length(buffer* this)
 {
   return BUFLEN(this);
 }
+
+size_t buffer_capacity(buffer* this)
+{
+  return BUFCAP(this);
+}
+
