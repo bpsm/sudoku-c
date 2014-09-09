@@ -15,46 +15,6 @@ point make_point(int x, int y)
   point p; p.x = x; p.y = y; return p;
 }
 
-void test_array(void)
-{
-  array *a = array_open(array_alloc(), 3, sizeof(point));
-
-  assert(3 == array_length(a));
-
-  point p;
-  p = make_point(10, 11);
-  array_put(a, 1, &p);
-
-  p = make_point(0, 1);
-  array_put(a, 0, &p);
-
-  p = make_point(20, 21);
-  array_put(a, 2, &p);
-
-  array_get(a, 0, &p);
-  assert(p.x == 0 && p.y == 1);
-
-  array_get(a, 1, &p);
-  assert(p.x == 10 && p.y == 11);
-
-  array_get(a, 2, &p);
-  assert(p.x == 20 && p.y == 21);
-
-  array_move(a, 1, 0, 2);
-
-  array_get(a, 0, &p);
-  assert(p.x == 0 && p.y == 1);
-
-  array_get(a, 1, &p);
-  assert(p.x == 0 && p.y == 1);
-
-  array_get(a, 2, &p);
-  assert(p.x == 10 && p.y == 11);
-
-  a = array_free(array_close(a));
-  assert(!a);
-}  
-
 void test_buffer(void)
 {
   point p;
@@ -105,6 +65,5 @@ void test_buffer(void)
 }
 
 int main(int n, char **args) {
-  test_array();
   test_buffer();
 }

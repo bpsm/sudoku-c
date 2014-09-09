@@ -6,17 +6,6 @@ typedef struct {
   char *data;
 } array;
 
-array *array_alloc(void);
-array *array_open(array *this, size_t capacity, size_t mem_size);
-array *array_close(array *this);
-array *array_free(array *this);
-
-void array_get(array *this, size_t index, void *member);
-void array_put(array *this, size_t index, void *member);
-void array_move(array *this, size_t dst_index, size_t src_index, size_t count);
-
-size_t array_length(array *this);
-
 typedef struct {
   array array;
   size_t gap;    /* position of gap */

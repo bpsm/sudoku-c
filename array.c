@@ -13,12 +13,13 @@
  * identically sized values.
  */
 
-array *array_alloc(void)
+
+static array *array_alloc(void)
 {
   return calloc(1, sizeof(array));
 }
 
-array *array_open(array *this, size_t capacity, size_t mem_size)
+static array *array_open(array *this, size_t capacity, size_t mem_size)
 {
   assert(this); assert(this->data == NULL);
   this->capacity = capacity;
@@ -27,32 +28,32 @@ array *array_open(array *this, size_t capacity, size_t mem_size)
   return this;
 }
 
-array *array_close(array *this)
+static array *array_close(array *this)
 {
   assert(this); assert(this->data);
   free(this->data);
   return this;
 }
 
-array *array_free(array *this)
+static array *array_free(array *this)
 {
   free(this);
   return NULL;
 }
 
-void array_get(array *this, size_t index, void *member)
+static void array_get(array *this, size_t index, void *member)
 {
   assert(this); assert(index < this->capacity);
   memmove(member, this->data + this->mem_size * index, this->mem_size);
 }
 
-void array_put(array *this, size_t index, void *member)
+static void array_put(array *this, size_t index, void *member)
 {
   assert(this); assert(index < this->capacity);
   memmove(this->data + this->mem_size * index, member, this->mem_size);
 }
 
-void array_move(array *this, size_t dst_index, size_t src_index, size_t count)
+static void array_move(array *this, size_t dst_index, size_t src_index, size_t count)
 {
   assert(this);
   assert(dst_index < this->capacity);
@@ -64,7 +65,7 @@ void array_move(array *this, size_t dst_index, size_t src_index, size_t count)
           count * this->mem_size);
 }
 
-size_t array_length(array *this)
+static size_t array_length(array *this)
 {
   return this->capacity;
 }
