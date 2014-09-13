@@ -6,24 +6,24 @@ typedef struct {
   size_t gap;      /* position of gap */
   size_t length;   /* length of gap is capacity - length */
   char  *data;     /* pointer to member data */
-} buffer;
+} buffer, *buffer_ref;
 
-buffer *buffer_alloc(void);
-buffer *buffer_open(buffer *this, size_t capacity, size_t mem_size);
-buffer *buffer_close(buffer *this);
-buffer *buffer_free(buffer *this);
+buffer_ref buffer_alloc(void);
+buffer_ref buffer_open(buffer_ref this, size_t capacity, size_t mem_size);
+buffer_ref buffer_close(buffer_ref this);
+buffer_ref buffer_free(buffer_ref this);
 
-void buffer_get(buffer* this, size_t index, void *member);
-void buffer_put(buffer* this, size_t index, void *member);
-void buffer_del(buffer* this, size_t index, void *member);
-void buffer_ins(buffer* this, size_t index, void *member);
+void buffer_get(buffer_ref this, size_t index, void *member);
+void buffer_put(buffer_ref this, size_t index, void *member);
+void buffer_del(buffer_ref this, size_t index, void *member);
+void buffer_ins(buffer_ref this, size_t index, void *member);
 
-void buffer_push(buffer* this, void *member);
-void buffer_pop(buffer* this, void *member);
-void buffer_top(buffer* this, void *member);
+void buffer_push(buffer_ref this, void *member);
+void buffer_pop(buffer_ref this, void *member);
+void buffer_top(buffer_ref this, void *member);
 
-size_t buffer_length(buffer* this);
-size_t buffer_capacity(buffer* this);
+size_t buffer_length(buffer_ref this);
+size_t buffer_capacity(buffer_ref this);
 
 
 /*
