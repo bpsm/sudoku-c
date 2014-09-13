@@ -5,44 +5,20 @@
 
 #include "array.h"
 
-/* 
- * Array
- * =====
- *
- * Randomly addresable storage for a fixed number of
- * identically sized values.
- */
 
-
-static array *array_open(array *this, size_t capacity, size_t mem_size)
-{
-  assert(this); assert(this->data == NULL);
-  this->capacity = capacity;
-  this->mem_size = mem_size;
-  this->data = calloc(capacity, mem_size);
-  return this;
-}
-
-static array *array_close(array *this)
-{
-  assert(this); assert(this->data);
-  free(this->data);
-  return this;
-}
-
-static void array_get(array *this, size_t index, void *member)
+static void array_get(buffer *this, size_t index, void *member)
 {
   assert(this); assert(index < this->capacity);
   memmove(member, this->data + this->mem_size * index, this->mem_size);
 }
 
-static void array_put(array *this, size_t index, void *member)
+static void array_put(buffer *this, size_t index, void *member)
 {
   assert(this); assert(index < this->capacity);
   memmove(this->data + this->mem_size * index, member, this->mem_size);
 }
 
-static void array_move(array *this, size_t dst_index, size_t src_index, size_t count)
+static void array_move(buffer *this, size_t dst_index, size_t src_index, size_t count)
 {
   assert(this);
   assert(dst_index < this->capacity);
@@ -71,16 +47,20 @@ buffer *buffer_alloc(void)
 buffer *buffer_open(buffer *this, size_t capacity, size_t mem_size)
 {
   assert(this);
-  array_open(&this->array, capacity, mem_size);
+  this->capacity = capacity;
+  this->mem_size = mem_size;
   this->gap = 0;
   this->length = 0;
+  this->data = calloc(capacity, mem_size);
   return this;
 }
 
 buffer *buffer_close(buffer *this)
 {
   assert(this);
-  array_close(&this->array);
+  assert(this->data);
+  free(this->data);
+  this->data = NULL;
   return this;
 }
 
@@ -92,14 +72,14 @@ buffer *buffer_free(buffer *this)
 }
 
 #define BUFLEN(this) (this->length)
-#define BUFCAP(this) (this->array.capacity)
+#define BUFCAP(this) (this->capacity)
 #define GAPLEN(this) (BUFCAP(this) - BUFLEN(this))
 
 void buffer_get(buffer* this, size_t index, void *member)
 {
   assert(this);
   assert(BUFLEN(this) > index);
-  array_get(&this->array,
+  array_get(this,
             index + ((index < this->gap) ? 0 : GAPLEN(this)),
             member);
 }
@@ -112,7 +92,7 @@ static void buffer_move_gap(buffer* this, size_t gap)
   if (this->gap < gap) {
     /* move gap to right (away from zero) */
     n = gap - this->gap;
-    array_move(&this->array, 
+    array_move(this,
                this->gap,
                this->gap + GAPLEN(this),
                n);
@@ -120,7 +100,7 @@ static void buffer_move_gap(buffer* this, size_t gap)
   } else if (gap < this->gap) {
     /* move gap to left (towards zero) */
     n = this->gap - gap;
-    array_move(&this->array,
+    array_move(this,
                this->gap + GAPLEN(this) - n,
                this->gap - n,
                n);
@@ -134,7 +114,7 @@ void buffer_put(buffer* this, size_t index, void *member)
   assert(index <= BUFLEN(this));
   if (index < BUFLEN(this)) {
     /* Overwrite an existing element */
-    array_put(&this->array, 
+    array_put(this,
               index + ((index < this->gap) ? 0 : GAPLEN(this)),
               member);
   } else {
@@ -144,7 +124,7 @@ void buffer_put(buffer* this, size_t index, void *member)
     assert(BUFLEN(this) < BUFCAP(this));
     if (this->gap != index)
       buffer_move_gap(this, index);
-    array_put(&this->array, index, member);
+    array_put(this, index, member);
     this->length++;
     this->gap++;
   }
@@ -168,7 +148,7 @@ void buffer_ins(buffer* this, size_t index, void *member)
   assert(BUFLEN(this) < BUFCAP(this));
   if (this->gap != index)
     buffer_move_gap(this, index);
-  array_put(&this->array, index, member);
+  array_put(this, index, member);
   this->length++;
   this->gap++;
 }

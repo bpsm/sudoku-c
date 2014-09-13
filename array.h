@@ -1,15 +1,11 @@
 #include <stdlib.h>
 
 typedef struct {
-  size_t capacity;
-  size_t mem_size;
-  char *data;
-} array;
-
-typedef struct {
-  array array;
-  size_t gap;    /* position of gap */
-  size_t length; /* length of gap is capacity - length */
+  size_t capacity; /* maximum number of members */
+  size_t mem_size; /* size of member in bytes */
+  size_t gap;      /* position of gap */
+  size_t length;   /* length of gap is capacity - length */
+  char  *data;     /* pointer to member data */
 } buffer;
 
 buffer *buffer_alloc(void);
