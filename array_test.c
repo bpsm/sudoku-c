@@ -18,11 +18,19 @@ point make_point(int x, int y)
 void test_buffer(void)
 {
   point p;
-  buffer *b = buffer_open(buffer_alloc(), 5, sizeof(point));
+  buffer b = buffer_open(buffer_alloc(), 5, sizeof(point));
 
   assert(buffer_length(b) == 0);
   p = make_point(0, 1);
   buffer_push(b, &p);
+
+  printf("(%d, %d)\n", p.x, p.y);
+  p = make_point(-1, -1);
+  printf("(%d, %d)\n", p.x, p.y);
+  buffer_get(b, 0, &p);
+  printf("(%d, %d)\n", p.x, p.y);
+  assert(p.x == 0 && p.y == 1);
+
   assert(buffer_length(b) == 1);
   p = make_point(2, 3);
   buffer_push(b, &p);
