@@ -14,11 +14,6 @@
  */
 
 
-static array *array_alloc(void)
-{
-  return calloc(1, sizeof(array));
-}
-
 static array *array_open(array *this, size_t capacity, size_t mem_size)
 {
   assert(this); assert(this->data == NULL);
@@ -33,12 +28,6 @@ static array *array_close(array *this)
   assert(this); assert(this->data);
   free(this->data);
   return this;
-}
-
-static array *array_free(array *this)
-{
-  free(this);
-  return NULL;
 }
 
 static void array_get(array *this, size_t index, void *member)
@@ -63,11 +52,6 @@ static void array_move(array *this, size_t dst_index, size_t src_index, size_t c
   memmove(this->data + dst_index * this->mem_size,
           this->data + src_index * this->mem_size,
           count * this->mem_size);
-}
-
-static size_t array_length(array *this)
-{
-  return this->capacity;
 }
 
 /*
