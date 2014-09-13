@@ -5,12 +5,10 @@ typedef struct array {
   size_t mem_size; /* size of member in bytes */
   size_t gap;      /* position of gap */
   size_t length;   /* length of gap is capacity - length */
-  char  *data;     /* pointer to member data */
+  char   data[];   /* member data */
 } *array;
 
-array array_alloc(void);
-array array_open(array this, size_t capacity, size_t mem_size);
-array array_close(array this);
+array array_alloc(size_t capacity, size_t mem_size);
 array array_free(array this);
 
 void array_get(array this, size_t index, void *member);

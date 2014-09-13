@@ -38,34 +38,18 @@ static void array__move(array this, size_t dst_index, size_t src_index, size_t c
  * deletion.
  */
 
-array array_alloc(void)
+array array_alloc(size_t capacity, size_t mem_size)
 {
-  return calloc(1, sizeof(struct array));
-}
-
-array array_open(array this, size_t capacity, size_t mem_size)
-{
-  assert(this);
+  array this = calloc(1, sizeof(struct array) + capacity * mem_size);
   this->capacity = capacity;
   this->mem_size = mem_size;
   this->gap = 0;
   this->length = 0;
-  this->data = calloc(capacity, mem_size);
-  return this;
-}
-
-array array_close(array this)
-{
-  assert(this);
-  assert(this->data);
-  free(this->data);
-  this->data = NULL;
   return this;
 }
 
 array array_free(array this)
 {
-  assert(this);
   free(this);
   return NULL;
 }

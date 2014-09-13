@@ -18,7 +18,7 @@ point make_point(int x, int y)
 void test_buffer(void)
 {
   point p;
-  array b = array_open(array_alloc(), 5, sizeof(point));
+  array b = array_alloc(5, sizeof(point));
 
   assert(array_length(b) == 0);
   p = make_point(0, 1);
@@ -60,7 +60,7 @@ void test_buffer(void)
   assert(p.x == 2 && p.y == 3);
   assert(array_length(b) == 0);
 
-  b = array_free(array_close(b));
+  b = array_free(b);
   assert(!b);
 }
 
