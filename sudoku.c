@@ -256,20 +256,21 @@ typedef struct {
   digit_set free[SUDOKU_SIZE];
 } sudoku;
 
-
-void claim(sudoku *s, pos p, digit_set ds)
+void revoke(sudoku *s, pos p, digit_set ds)
 {
-  assert( SET_SIZE(ds) == 1 );
-  s->free[p] = ds;
   for (int i = 0; i < NUM_NEIGHBORS; i++) {
     pos n = neighbors[p][i];
-    digit_set old_set = s->free[n];
-    digit_set new_set = old_set & ~ds;
-    s->free[n] = new_set;
-    if (SET_SIZE(old_set) > 1 && SET_SIZE(new_set) == 1) {
-      claim(s, n, new_set);
-    }
+    bool was_open = SET_SIZE(s->free[n]) > 1;
+    s->free[n] &= ~ds;
+    if (was_open && SET_SIZE(s->free[n]) == 1)
+      revoke(s, n, s->free[n]);
   }
+}
+
+void claim(sudoku *s, pos p, digit d)
+{
+  assert(IN_SET(s->free[p], d));
+  revoke(s, p, s->free[p] = SET_OF(d));
 }
 
 
@@ -348,7 +349,7 @@ bool solve(solver *s)
   sudoku r = s->sudoku;
   for (digit d = MIN_DIGIT; d <= MAX_DIGIT; d++)
     if (IN_SET(dsp, d)) {
-      claim(&s->sudoku, p, SET_OF(d));
+      claim(&s->sudoku, p, d);
       if (solve(s)) {
         return true;
       }
@@ -419,7 +420,7 @@ void sudoku_from_text(sudoku *s, char const *t)
   for (int i = 0; i < SUDOKU_SIZE && t[i]; i++) {
     char c = t[i];
     if ('1' <= c && c <= '9')
-      claim(s, i, SET_OF(CHAR_TO_DIGIT(c)));
+      claim(s, i, CHAR_TO_DIGIT(c));
   }
 }
 
