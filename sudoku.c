@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
+#include "array.h"
 
 /*
  * Basic Types
@@ -288,8 +289,8 @@ typedef struct {
     int backtrack;
     int choice;
   } count;
+  array solutions;
 } solver;
-
 
 /*
  * Find the position which we'll next try to solve for.
@@ -343,29 +344,47 @@ bool solve(solver *s)
   int n = SET_SIZE(dsp);
   if (n == 0)
     return false;
-  if (n == 1)
-    return true;
+
+  if (n == 1) {
+    array_push(s->solutions, &s->sudoku);
+    return (array_length(s->solutions) == array_capacity(s->solutions));
+  }
 
   sudoku r = s->sudoku;
-  for (digit d = MIN_DIGIT; d <= MAX_DIGIT; d++)
+  for (digit d = MIN_DIGIT; d <= MAX_DIGIT; d++) {
     if (IN_SET(dsp, d)) {
       claim(&s->sudoku, p, d);
       if (solve(s)) {
-        return true;
+          return true;
       }
       s->count.backtrack++;
       s->sudoku = r;
     }
-  return false;
+  }
+  return array_length(s->solutions) > 0;
 }
 
-void init_solver(solver *s, sudoku const * sudoku)
+solver *clear_counts(solver *v)
 {
-  if (sudoku) {
-    s->sudoku = *sudoku;
+  v->count.backtrack = 0;
+  v->count.choice = 0;
+  return v;
+}  
+
+solver *new_solver(size_t max_sols)
+{
+  solver *v = calloc(sizeof(solver), 1);
+  v->solutions = array_alloc(max_sols, sizeof(sudoku));
+  return v;
+}
+
+solver *free_solver(solver *v)
+{
+  if (v) {
+    array_free(v->solutions);
+    free(v);
   }
-  s->count.backtrack = 0;
-  s->count.choice = 0;
+  return NULL;
 }
 
 /*
@@ -476,7 +495,7 @@ bool read_sudoku(reader *r, solver *s)
   }
   /* Parse the text in buff into the solver's sudoku. */
   sudoku_from_text(&s->sudoku, r->buf);
-  init_solver(s, NULL);
+  clear_counts(s);
   return true;
 }
 
@@ -491,25 +510,27 @@ bool read_sudoku(reader *r, solver *s)
  */
 
 int main(int n, char **args) {
-  bool verbose = true;
-  solver s;
-  char t[SUDOKU_SIZE+1];
+  solver *v = new_solver(2);
   reader* r = new_reader();
 
-  while (read_sudoku(r, &s)) {
-    bool solved = solve(&s);
-    sudoku_to_text(&s.sudoku, t);
-    if (verbose) {
-      printf("%8d %8d %1s %81s %81s\n",
-             s.count.choice,
-             s.count.backtrack,
-             solved ? "o" : "x",
-             r->buf,
-             t);
+  while (read_sudoku(r, v)) {
+    if (!solve(v)) {
+      printf("%81s %8d %8d 0 0\n",
+             r->buf, v->count.choice, v->count.backtrack);
     } else {
-      printf("%s\n", t);
+      int n = array_length(v->solutions);
+      for (int i = 0; i < n; i++) {
+        sudoku s;
+        char t[SUDOKU_SIZE+1];
+        array_pop(v->solutions, &s);
+        sudoku_to_text(&s, t);
+        printf("%81s %8d %8d %1d %1d %81s\n",
+               r->buf, v->count.choice, v->count.backtrack,
+               i+1, n, t);
+      }
     }
   }
+  free_solver(v);
   free_reader(r);
   return 0;
 }

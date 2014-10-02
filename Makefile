@@ -13,10 +13,10 @@ all: sudoku array_test
 clean:
 	rm -f *.o sudoku array_test
 
-sudoku: sudoku.o
+sudoku: sudoku.o array.o
 	$(CC) $(CFLAGS) $^ -o $@
 
-sudoku.o: sudoku.c
+sudoku.o: sudoku.c array.h
 	$(CC) -c $(CFLAGS) $<
 
 array.o: array.c array.h
